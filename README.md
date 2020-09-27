@@ -4,7 +4,8 @@ A collection of Data Structures and Algorithms practice problems with elegant py
 ## Problems
 This section provides a description of the problems available in this repository so far.
 
-#### 0/1 Knapsack Problem
+### 0/1 Knapsack Problem
+_Find the Pythonic Solution [here](knapsack.py)_
 
 **General Knapsack Problem:**
     Given a list of items (having some weight and value) and a knapsack with a fixed capacity, the problem is to try to
@@ -15,5 +16,3 @@ This section provides a description of the problems available in this repository
     food that you can without going over your daily allotted calorie limit.
 
 Read more about the Knapsack problem [here](https://en.wikipedia.org/wiki/Knapsack_problem)
-
-Find the pythonic solution [here](knapsack.py)
