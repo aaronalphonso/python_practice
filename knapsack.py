@@ -8,8 +8,29 @@ General Knapsack Problem:
 Our Specific Knapsack Problem:
     We use calories instead of weight, the context of the problem is: You are at a restaurant trying to eat the best
     food that you can without going over your daily allotted calorie limit.
+
+Solutions:
+    There are three solutions provided
+        - Greedy Approach
+        - Exhaustive Tree Approach
+        - Dynamic Programming Approach (This is just Exhaustive Tree + Memoization)
+
+Analysis:
+    While the Greedy solution is the fastest, it is susceptible to arriving at locally optimal solutions and missing
+    the globally optimal solution.
+
+    The Exhaustive Tree solution always gives the globally optimal solution, but is inherently slow as it has to
+    compute each combination in the tree. The complexity of this solution is exponential in nature and can soon become
+    infeasible.
+
+    The Dynamic Programming solution is the same as the exhaustive tree solution, with one key difference; it uses
+    memoization to avoid solving sub-problems in the tree that it has already solved before and thus increases
+    efficiency. Depending on the overlap of sub-problems, this solution significantly reduces the time to reach the
+    globally optimal solution.
 """
+
 from collections import namedtuple
+from functools import wraps
 from random import randrange, seed
 
 
@@ -99,8 +120,71 @@ def exhaustive_tree(items, calorie_limit):
     return max(choice_a, choice_b, key=lambda x: sum(i.value for i in x))
 
 
+def with_memoization(func):
+    """A specific decorator to add memoization for the dynamic_programming implementation
+
+    Uses the ordered list of items along with the calorie limit as the cache_key
+    """
+    cache = {}
+
+    @wraps(func)
+    def wrapper(items, calorie_limit):
+        """The wrapper function which applies that actual logic of caching to achieve memoization"""
+
+        # Two items having the same calories and value should be treated the same, so we use these two properties to
+        # represent each item in the list.
+        items_str = "_".join(sorted(("{}_{}".format(item.calories, item.value) for item in items), reverse=True))
+        # Use the ordered list of items along with the calorie limit as the cache_key
+        cache_key = "items={},calorie_limit={}".format(items_str, calorie_limit)
+
+        if cache_key in cache:
+            return cache.get(cache_key)
+        result = func(items=items, calorie_limit=calorie_limit)
+        cache[cache_key] = result
+        return result
+
+    return wrapper
+
+
+@with_memoization
+def dynamic_programming(items, calorie_limit):
+    """The dynamic programming approach to filling the knapsack. This approach is the same as the exhaustive tree
+    approach, with one key difference; it uses memoization to avoid recalculating duplicate paths. i.e. if two
+    sub-branches of the tree are the same, we avoid recalculating the solution and reuse the result from cache.
+
+    This is done by means of the added decorator @with_memoization
+    """
+    # If there are no more items to consider, return an empty selection
+    if not items:
+        return []
+
+    # Pick the first item from the list. This is the item we will consider.
+    item = items[0]
+    remaining_items = items[1:]
+
+    # Diverge into two branches, one in which the item is selected and another in which the item is discarded.
+    # Keep branching out recursively at each item. This will generate every possible combination.
+
+    # Branch A - The branch in which the item is selected
+    # We only want to calculate the branch recursively if adding the item, doesn't overflow the knapsack capacity
+    if item.calories <= calorie_limit:
+        # Assuming the item is selected, calculate the sub-problem solution
+        choice_a = [item] + dynamic_programming(items=remaining_items,
+                                                calorie_limit=calorie_limit - item.calories)
+    else:
+        # If it does overflow, we skip the recursive calculations for the subtree.
+        choice_a = []
+
+    # Branch B - The branch in which the item is discarded
+    choice_b = dynamic_programming(items=remaining_items,
+                                   calorie_limit=calorie_limit)
+
+    # Compare the selection from the two branches and return the more efficient solution.
+    return max(choice_a, choice_b, key=lambda x: sum(i.value for i in x))
+
+
 def display_items(items):
-    """Prints the list of items with their calories and value along with a total at the end"""
+    """Prints the list of items with their calories and value in a nice tabular format along with a total at the end"""
     width = 49
 
     print("-" * width)

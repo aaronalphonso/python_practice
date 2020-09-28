@@ -1,5 +1,8 @@
 # Python Practice
-A collection of Data Structures and Algorithms practice problems with elegant pythonic solutions.
+A collection of pythonic solutions to standard Data Structures and Algorithms practice problems with a focus on 
+clean well-documented code.
+
+The goal of this repo is to serve as a refresher on these basic problems.
 
 ## Problems
 This section provides a description of the problems available in this repository so far.
